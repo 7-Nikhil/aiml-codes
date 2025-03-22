@@ -1,0 +1,9 @@
+# This is a program for student management system that provides the following functionalities:
+# 1. CRUD operations
+# 2. User Authentication/Authorization
+# 3. Data Storage/Management/vallidation using Database Integration
+# 4. Report Generation
+# 5. Notification System
+# 6. A.I. Chat Management
+# 7. Data Visualization/Analytics for student performance monitoring
+# All this combined together in a single web application
