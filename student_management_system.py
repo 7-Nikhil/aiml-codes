@@ -158,7 +158,7 @@ def main() -> None:
                 
             if get_valid_input("\nDo you want to continue? (yes/no): ", str, lambda x: x.lower() in ["yes", "no"], "Please enter YES or NO.") == "no":
                 break
-        except (TypeError, RuntimeError) as e:
+        except (AttributeError, TypeError, RuntimeError) as e:
             print("\nError!!")
             print("The Error was: ", repr(e))
             continue
