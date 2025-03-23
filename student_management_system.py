@@ -161,8 +161,8 @@ def main() -> None:
                 student.salary()
                 
             elif roles == "FACULTY":
-                name, course = get_valid_multiple_input("\nEnter your Name, Course (comma separated): ", 2)
-                qualification = list(map(str, input("\nEnter your Qualification (space separated): ").strip().upper().split()))
+                name, course = get_valid_multiple_input("\nEnter your Name, Course interested in teaching (comma separated): ", 2)
+                qualification = list(map(str, input("\nEnter your Qualifications (comma separated): ").strip().upper().split(",")))
                 experience = get_valid_input("\nEnter your Experience in years: ", int, lambda x: x > 0, "Must be a positive number")
                 faculty = Faculty(name.strip(), course.strip(), qualification, experience)
                 faculty.display_result()
