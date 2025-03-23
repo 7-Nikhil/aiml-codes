@@ -11,15 +11,21 @@ class College(ABC):
 
 class Student(College):
     def __init__(self, name: str, roll_no: int, branch: str, year_of_admission: int, subjects: dict) -> None:
-        self._name = name
+        self.__name = name
         self.roll_no = roll_no
         self.branch = branch
         self.year_of_admission = year_of_admission
         self.subjects = subjects
+    @property
+    def name(self) -> str:
+        return self.__name
+    @name.setter
+    def name_setter(self, name: str) -> None:
+        self.__name = name
     def display_result(self) -> None:
         print("\nStudent Details: ")
         print("Roll No: ", self.roll_no)
-        print("Student Name: ", self._name)
+        print("Student Name: ", self.__name)
         print("Year of Admission: ", self.year_of_admission)
         print("Branch: ", self.branch)
         print("Subjects and Marks: ")
@@ -34,13 +40,19 @@ class Student(College):
 class Faculty(College):
     designation: str = None
     def __init__(self, name: str, course: str, qualification: list, experience: int) -> None:
-        self._name = name
+        self.__name = name
         self.course = course
         self.qualification = qualification
         self.experience = experience
+    @property
+    def name(self) -> str:
+        return self.__name
+    @name.setter
+    def name_setter(self, name: str) -> None:     
+        self.__name = name
     def display_result(self) -> None:
         print("\nFaculty Details: ")
-        print("Faculty Name: ", self._name)
+        print("Faculty Name: ", self.__name)
         print("Course: ", self.course)
         print("Qualification: ", ", ".join(self.qualification))
         print("Experience in years: ", self.experience)
@@ -76,12 +88,18 @@ class Faculty(College):
                 
 class Staff(College):
     def __init__(self, name: str, role: str, date_of_joining: str) -> None:
-        self._name = name
+        self.__name = name
         self.role = role
         self.date_of_joining = datetime.strptime(date_of_joining, "%Y-%m-%d").date()
+    @property
+    def name(self) -> str:
+        return self.__name
+    @name.setter
+    def name_setter(self, name: str) -> None:     
+        self.__name = name
     def display_result(self) -> None:
         print("\nStaff Details: ")
-        print("Staff Name: ", self._name)
+        print("Staff Name: ", self.__name)
         print("Role: ", self.role)
         print("Date of Joining (yyyy-mm-dd): ", self.date_of_joining)
         print("Current Date: ", date.today())
