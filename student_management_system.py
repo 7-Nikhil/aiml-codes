@@ -101,7 +101,7 @@ class Staff(College):
         else:
             print("Enter valid role")
 
-def get_valid_input(prompt: int, expected_type: type = str, condition: callable = lambda x: True, error_msg: str = "Invalid input: ") -> any:
+def get_valid_input(prompt: str, expected_type: type = str, condition: callable = lambda x: True, error_msg: str = "Invalid input: ") -> any:
     while True:
         try:
             value = expected_type(input(prompt).strip().upper())
@@ -132,36 +132,35 @@ def main() -> None:
             roles: str = input("\nEnter your role: ").strip().upper()  
             
             if roles == "STUDENT":
-                name, roll_no, branch, year_of_admission = get_valid_multiple_input("Enter your name, roll no, branch, year of admission (comma separated): ", 4)
-                no_of_subjects = get_valid_input("Enter the number of subjects: ", int, lambda x: x > 0, "Must be a positive number")
+                name, roll_no, branch, year_of_admission = get_valid_multiple_input("\nEnter your Name, Roll no, Branch, Year of Admission (comma separated): ", 4)
+                no_of_subjects = get_valid_input("\nEnter the number of subjects: ", int, lambda x: x > 0, "Must be a positive number")
                 subjects = {
                     sub: int(marks)
-                    for sub, marks in (input("Enter the subject and marks (space separated): ").upper().split() for _ in range(no_of_subjects))
+                    for sub, marks in (input("\nEnter the subject and marks (space separated): ").upper().split() for _ in range(no_of_subjects))
                 }
                 student = Student(name.strip(), int(roll_no.strip()), branch.strip(), int(year_of_admission.strip()), subjects)
                 student.display_result()
                 student.salary()
                 
             elif roles == "FACULTY":
-                name, course = get_valid_multiple_input("Enter your name, course (comma separated): ", 2)
-                qualification = list(map(str, input("Enter your qualification (space separated): ").strip().upper().split()))
-                experience = get_valid_input("Enter your experience in years: ", int, lambda x: x > 0, "Must be a positive number")
+                name, course = get_valid_multiple_input("\nEnter your Name, Course (comma separated): ", 2)
+                qualification = list(map(str, input("\nEnter your Qualification (space separated): ").strip().upper().split()))
+                experience = get_valid_input("\nEnter your Experience in years: ", int, lambda x: x > 0, "Must be a positive number")
                 faculty = Faculty(name.strip(), course.strip(), qualification, experience)
                 faculty.display_result()
                 faculty.salary()
                 
             elif roles == "STAFF":
-                name, role, date_of_joining = get_valid_multiple_input("Enter your name, role, date of joining (yyyy-mm-dd) (comma separated): ", 3)
+                name, role, date_of_joining = get_valid_multiple_input("\nEnter your Name, Role, Date of joining (yyyy-mm-dd) (comma separated): ", 3)
                 staff = Staff(name.strip(), role.strip(), date_of_joining.strip())
                 staff.display_result()
                 staff.salary()
                 
-            if get_valid_input("\nDo you want to continue? (yes/no): ", str, lambda x: x.lower() in ["yes", "no"], "Please enter YES or NO.") == "no":
+            if get_valid_input("\nDo you want to continue? (yes/no): ", str, lambda x: x.lower() in ["yes", "no"], "Please enter YES or NO.").lower() == "no":
                 break
         except (AttributeError, TypeError, RuntimeError) as e:
             print("\nError!!")
-            print("The Error was: ", repr(e))
-            continue
+            print("\nThe Error was: ", repr(e))
         finally:
             print("\nThank you for using College Management System")
 
