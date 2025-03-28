@@ -1,6 +1,24 @@
 from abc import ABC, abstractmethod
 from datetime import date, datetime
+from enum import Enum 
 
+class Grade(Enum):
+    O = (90, 100, "O")
+    A_plus = (75, 89, "A+")
+    A = (65, 74, "A")
+    B_plus = (55, 64, "B+")
+    B = (50, 54, "B")
+    C = (45, 49, "C")
+    P = (40, 44, "P")
+    F = (0, 39, "F")
+    
+    @classmethod
+    def get_grade(cls, marks: int) -> str:
+        for grade in cls:
+            if grade.value[0] <= marks <= grade.value[1]:
+                return grade.value[2]
+        return "Invalid marks"
+        
 class College(ABC):
     @abstractmethod
     def display_result(self):
@@ -11,48 +29,51 @@ class College(ABC):
 
 class Student(College):
     def __init__(self, name: str, roll_no: int, branch: str, year_of_admission: int, subjects: dict) -> None:
-        self.__name = name
+        self._name = name
         self.roll_no = roll_no
         self.branch = branch
         self.year_of_admission = year_of_admission
         self.subjects = subjects
     @property
     def name(self) -> str:
-        return self.__name
+        return self._name
     @name.setter
     def name_setter(self, name: str) -> None:
-        self.__name = name
+        self._name = name
     def display_result(self) -> None:
         print("\nStudent Details: ")
         print("Roll No: ", self.roll_no)
-        print("Student Name: ", self.__name)
+        print("Student Name: ", self._name)
         print("Year of Admission: ", self.year_of_admission)
         print("Branch: ", self.branch)
         print("Subjects and Marks: ")
-        for sub in self.subjects:
-            print(sub, ":", self.subjects[sub])
+        for sub, marks in self.subjects.items():
+            grade = Grade.get_grade(marks)
+            print(f"{sub}: {marks} ({grade})")
         print("Total Marks: ", (self.subjects.__len__()) * 100)
         print("Marks Obtained: ", sum(self.subjects.values()))
-        print("Percentage: ", sum(self.subjects.values()) / len(self.subjects))
+        percentage = float(sum(self.subjects.values()) / len(self.subjects))
+        print(f"Percentage: {percentage:.2f}%")
+        print("Overall grade: ", Grade.get_grade(int(percentage)))
     def salary(self) -> None:
         pass
 
 class Faculty(College):
     designation: str = None
     def __init__(self, name: str, course: str, qualification: list, experience: int) -> None:
-        self.__name = name
+        self._name = name
         self.course = course
         self.qualification = qualification
         self.experience = experience
     @property
     def name(self) -> str:
-        return self.__name
+        return self._name
     @name.setter
     def name_setter(self, name: str) -> None:     
-        self.__name = name
+        self._name = name
     def display_result(self) -> None:
         print("\nFaculty Details: ")
-        print("Faculty Name: ", self.__name)
+        print("Faculty Name: ", self._name)
         print("Course: ", self.course)
         print("Qualification: ", ", ".join(self.qualification))
         print("Experience in years: ", self.experience)
@@ -88,18 +109,18 @@ class Faculty(College):
                 
 class Staff(College):
     def __init__(self, name: str, role: str, date_of_joining: str) -> None:
-        self.__name = name
+        self._name = name
         self.role = role
         self.date_of_joining = datetime.strptime(date_of_joining, "%Y-%m-%d").date()
     @property
     def name(self) -> str:
-        return self.__name
+        return self._name
     @name.setter
     def name_setter(self, name: str) -> None:     
-        self.__name = name
+        self._name = name
     def display_result(self) -> None:
         print("\nStaff Details: ")
-        print("Staff Name: ", self.__name)
+        print("Staff Name: ", self._name)
         print("Role: ", self.role)
         print("Date of Joining (yyyy-mm-dd): ", self.date_of_joining)
         print("Current Date: ", date.today())
@@ -154,7 +175,7 @@ def main() -> None:
                 no_of_subjects = get_valid_input("\nEnter the number of subjects: ", int, lambda x: x > 0, "Must be a positive number")
                 subjects = {
                     sub: int(marks)
-                    for sub, marks in (input("\nEnter the subject and marks (space separated): ").upper().split() for _ in range(no_of_subjects))
+                    for sub, marks in (input("\nEnter the subject and marks (comma separated): ").upper().split(",") for _ in range(no_of_subjects))
                 }
                 student = Student(name.strip(), int(roll_no.strip()), branch.strip(), int(year_of_admission.strip()), subjects)
                 student.display_result()
