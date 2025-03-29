@@ -2,23 +2,6 @@ from abc import ABC, abstractmethod
 from datetime import date, datetime
 from enum import Enum 
 
-class Grade(Enum):
-    O = (90, 100, "O")
-    A_plus = (75, 89, "A+")
-    A = (65, 74, "A")
-    B_plus = (55, 64, "B+")
-    B = (50, 54, "B")
-    C = (45, 49, "C")
-    P = (40, 44, "P")
-    F = (0, 39, "F")
-    
-    @classmethod
-    def get_grade(cls, marks: int) -> str:
-        for grade in cls:
-            if grade.value[0] <= marks <= grade.value[1]:
-                return grade.value[2]
-        return "Invalid marks"
-        
 class College(ABC):
     @abstractmethod
     def display_result(self):
@@ -26,14 +9,50 @@ class College(ABC):
     @abstractmethod
     def salary(self):
         pass
-
+    
+    class Grade(Enum):
+        O = (90, 100, "O")
+        A_plus = (75, 89, "A+")
+        A = (65, 74, "A")
+        B_plus = (55, 64, "B+")
+        B = (50, 54, "B")
+        C = (45, 49, "C")
+        P = (40, 44, "P")
+        F = (0, 39, "F")
+    
+        @classmethod
+        def get_grade(cls, marks: int) -> str:
+            for grade in cls:
+                if grade.value[0] <= marks <= grade.value[1]:
+                    return grade.value[2]
+            return "Invalid marks"
+    
+    class Branch_Subjects(Enum):
+        AIML = {
+            4 : {"ARD 202": "SOFTWARE ENGINEERING", "ARD 204": "INTRO TO AI", "ARM 206": "DATA WAREHOUSE AND MINING", "ARM 208": "ANALYSIS AND DESIGN OF ALGORITHMS", "ARM 210": "INTRO TO ML", "ARD 212": "COMPUTER NETWORKS", "HSAI 214": "ENGINEERING ECONOMICS"}
+        }
+        @classmethod
+        def get_subjects(cls, branch: str, semester: int) -> dict:
+            return cls[branch.upper()].value.get(semester, {}) if branch.upper() in cls.__members__ else None
+        
 class Student(College):
-    def __init__(self, name: str, roll_no: int, branch: str, year_of_admission: int, subjects: dict) -> None:
+    def __init__(self, name: str, roll_no: int, branch: str, year_of_admission: int, semester: int) -> None:
         self._name = name
         self.roll_no = roll_no
         self.branch = branch
         self.year_of_admission = year_of_admission
-        self.subjects = subjects
+        self.semester = semester
+        self.subjects = College.Branch_Subjects.get_subjects(self.branch, self.semester) or {}
+        self.marks = {}
+        print(f"\nEnter marks obtained for the following subjects for {self.branch} semester {self.semester}")
+        for code, subjects in self.subjects.items():
+            while True:
+                try:
+                    marks = get_valid_input(f"\nEnter marks for {code} {subjects}: ", int, lambda x: 0<=x<=100, "Marks must be between 0 and 100")
+                    self.marks[code] = marks
+                    break
+                except ValueError as e:
+                    print("Invalid input: ", repr(e))
     @property
     def name(self) -> str:
         return self._name
@@ -46,15 +65,16 @@ class Student(College):
         print("Student Name: ", self._name)
         print("Year of Admission: ", self.year_of_admission)
         print("Branch: ", self.branch)
+        print("Semester: ", self.semester)
+        print("Number of subjects for this semester: ", len(self.subjects))
         print("Subjects and Marks: ")
-        for sub, marks in self.subjects.items():
-            grade = Grade.get_grade(marks)
-            print(f"{sub}: {marks} ({grade})")
-        print("Total Marks: ", (self.subjects.__len__()) * 100)
-        print("Marks Obtained: ", sum(self.subjects.values()))
-        percentage = float(sum(self.subjects.values()) / len(self.subjects))
+        for code, subject in self.subjects.items():
+            print(f"{code} {subject}: {self.marks[code]} ({College.Grade.get_grade(self.marks[code])})")
+        print("Total Marks: ", len(self.subjects) * 100)
+        print("Marks Obtained: ", sum(self.marks.values()))
+        percentage = float(sum(self.marks.values()) / len(self.subjects))
         print(f"Percentage: {percentage:.2f}%")
-        print("Overall grade: ", Grade.get_grade(int(percentage)))
+        print("Overall grade: ", College.Grade.get_grade(int(percentage)))
     def salary(self) -> None:
         pass
 
@@ -171,13 +191,8 @@ def main() -> None:
             roles: str = input("\nEnter your role: ").strip().upper()  
             
             if roles == "STUDENT":
-                name, roll_no, branch, year_of_admission = get_valid_multiple_input("\nEnter your Name, Roll no, Branch, Year of Admission (comma separated): ", 4)
-                no_of_subjects = get_valid_input("\nEnter the number of subjects: ", int, lambda x: x > 0, "Must be a positive number")
-                subjects = {
-                    sub: int(marks)
-                    for sub, marks in (input("\nEnter the subject and marks (comma separated): ").upper().split(",") for _ in range(no_of_subjects))
-                }
-                student = Student(name.strip(), int(roll_no.strip()), branch.strip(), int(year_of_admission.strip()), subjects)
+                name, roll_no, branch, year_of_admission, semester = get_valid_multiple_input("\nEnter your Name, Roll no, Branch, Year of Admission, Semester (comma separated): ", 5)
+                student = Student(name.strip(), int(roll_no.strip()), branch.strip(), int(year_of_admission.strip()), int(semester))
                 student.display_result()
                 student.salary()
                 
