@@ -2,6 +2,34 @@ from abc import ABC, abstractmethod
 from datetime import date, datetime
 from enum import Enum 
 
+def load_branch_subjects(filename="branch subjects.txt"):
+    branch_subjects = {}
+    
+    with open(filename, "r") as file:
+        lines = file.readlines()
+    
+    current_branch = None
+    current_semester = None
+    
+    for line in lines:
+        line = line.strip()
+        if line.startswith("BRANCH:"):
+            current_branch = line.split(":")[1].strip()
+            branch_subjects.setdefault(current_branch, {})
+        elif line.startswith("SEMESTER:"):
+            current_semester = int(line.split(":")[1].strip())
+            branch_subjects[current_branch].setdefault(current_semester, {})
+        elif line.startswith("SUBJECTS:"):
+            subjects = line.split(":", 1)[1].strip().split(", ")
+            for subject in subjects:
+                parts = subject.split(" ", 1)
+                if len(parts) == 2:
+                    code, name = parts
+                    branch_subjects[current_branch][current_semester][code] = name.strip()
+    
+    return branch_subjects
+branch_subjects = load_branch_subjects("branch subjects.txt")
+    
 class College(ABC):
     @abstractmethod
     def display_result(self):
@@ -27,13 +55,12 @@ class College(ABC):
                     return grade.value[2]
             return "Invalid marks"
     
-    class Branch_Subjects(Enum):
-        AIML = {
-            4 : {"ARD 202": "SOFTWARE ENGINEERING", "ARD 204": "INTRO TO AI", "ARM 206": "DATA WAREHOUSE AND MINING", "ARM 208": "ANALYSIS AND DESIGN OF ALGORITHMS", "ARM 210": "INTRO TO ML", "ARD 212": "COMPUTER NETWORKS", "HSAI 214": "ENGINEERING ECONOMICS"}
-        }
+    class BranchSubjects:
         @classmethod
         def get_subjects(cls, branch: str, semester: int) -> dict:
-            return cls[branch.upper()].value.get(semester, {}) if branch.upper() in cls.__members__ else None
+            if branch in branch_subjects:  
+                return branch_subjects[branch].get(semester, "Invalid Semester")
+            return "Invalid Branch"
         
 class Student(College):
     def __init__(self, name: str, roll_no: int, branch: str, year_of_admission: int, semester: int) -> None:
@@ -42,22 +69,29 @@ class Student(College):
         self.branch = branch
         self.year_of_admission = year_of_admission
         self.semester = semester
-        self.subjects = College.Branch_Subjects.get_subjects(self.branch, self.semester) or {}
+        self.subjects = College.BranchSubjects.get_subjects(self.branch, self.semester) or {}
+        if not isinstance(self.subjects, dict):
+            print("Invalid branch or semester")
+            self.subjects = {}
         self.marks = {}
         print(f"\nEnter marks obtained for the following subjects for {self.branch} semester {self.semester}")
         for code, subjects in self.subjects.items():
             while True:
                 try:
-                    marks = get_valid_input(f"\nEnter marks for {code} {subjects}: ", int, lambda x: 0<=x<=100, "Marks must be between 0 and 100")
-                    self.marks[code] = marks
-                    break
+                    print(f"\nEnter marks for {code} {subjects}: ", end="")
+                    marks = int(input().strip())
+                    if 0 < marks < 100:
+                        self.marks[code] = marks
+                        break
+                    else:
+                        print("Marks should be between 0 and 100.")
                 except ValueError as e:
                     print("Invalid input: ", repr(e))
     @property
     def name(self) -> str:
         return self._name
     @name.setter
-    def name_setter(self, name: str) -> None:
+    def name(self, name: str) -> None:
         self._name = name
     def display_result(self) -> None:
         print("\nStudent Details: ")
@@ -66,7 +100,7 @@ class Student(College):
         print("Year of Admission: ", self.year_of_admission)
         print("Branch: ", self.branch)
         print("Semester: ", self.semester)
-        print("Number of subjects for this semester: ", len(self.subjects))
+        print("\nNumber of subjects for this semester: ", len(self.subjects))
         print("Subjects and Marks: ")
         for code, subject in self.subjects.items():
             print(f"{code} {subject}: {self.marks[code]} ({College.Grade.get_grade(self.marks[code])})")
@@ -89,7 +123,7 @@ class Faculty(College):
     def name(self) -> str:
         return self._name
     @name.setter
-    def name_setter(self, name: str) -> None:     
+    def name(self, name: str) -> None:     
         self._name = name
     def display_result(self) -> None:
         print("\nFaculty Details: ")
@@ -136,7 +170,7 @@ class Staff(College):
     def name(self) -> str:
         return self._name
     @name.setter
-    def name_setter(self, name: str) -> None:     
+    def name(self, name: str) -> None:     
         self._name = name
     def display_result(self) -> None:
         print("\nStaff Details: ")
