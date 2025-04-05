@@ -26,7 +26,6 @@ def load_branch_subjects(filename="branch subjects.txt"):
                 if len(parts) == 2:
                     code, name = parts
                     branch_subjects[current_branch][current_semester][code] = name.strip()
-    
     return branch_subjects
 branch_subjects = load_branch_subjects("branch subjects.txt")
     
@@ -128,7 +127,7 @@ class Faculty(College):
     def display_result(self) -> None:
         print("\nFaculty Details: ")
         print("Faculty Name: ", self._name)
-        print("Course: ", self.course)
+        print("Course desiring to teach: ", self.course)
         print("Qualification: ", ", ".join(self.qualification))
         print("Experience in years: ", self.experience)
         designations: dict = {
@@ -213,12 +212,12 @@ def get_valid_multiple_input(prompt: str, num_value: int) -> list:
 
 def main() -> None:
     print(""" 
-    Welcome to College Management System
-    ====================================
-    Please select a role:
-    1. Student
-    2. Faculty
-    3. Staff
+Welcome to College Management System
+====================================
+Please select a role:
+1. Student
+2. Faculty
+3. Staff
           """)
     while True:
         try:
