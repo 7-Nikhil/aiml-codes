@@ -1,22 +1,20 @@
 import mysql.connector as mysql
 
-mydb = mysql.connect(
-    host="localhost",
-    user="root",
-    password="123456789",
-)
-mycursor = mydb.cursor()
-mycursor.execute("CREATE DATABASE IF NOT EXISTS college_management_system")
-mycursor.execute("USE college_management_system")
-mycursor.execute("CREATE TABLE IF NOT EXISTS Students(ENROLLMENT_ID INT PRIMARY KEY, FULL_NAME VARCHAR(50) NOT NULL, BRANCH_NAME VARCHAR(50) NOT NULL, YEAR_OF_ADMISSION INT NOT NULL, SEMESTER INT NOT NULL)")
-mycursor.execute("CREATE TABLE IF NOT EXISTS Subjects(SUBJECT_CODE VARCHAR(50) NOT NULL, SUBJECT_NAME VARCHAR(50) NOT NULL, BRANCH_NAME VARCHAR(50) NOT NULL, SEMESTER INT NOT NULL)")
-mycursor.execute("CREATE TABLE IF NOT EXISTS Marks(ENROLLMENT_ID INT NOT NULL, SUBJECT_CODE VARCHAR(50) NOT NULL, BRANCH_NAME VARCHAR(50) NOT NULL, SEMESTER INT NOT NULL, MARKS INT CHECK(MARKS BETWEEN 0 AND 100) NOT NULL, GRADE VARCHAR(10) NOT NULL, FOREIGN KEY (ENROLLMENT_ID) REFERENCES Students(ENROLLMENT_ID) ON DELETE CASCADE, FOREIGN KEY (SUBJECT_CODE, BRANCH_NAME, SEMESTER) REFERENCES Subjects(SUBJECT_CODE, BRANCH_NAME, SEMESTER) ON DELETE CASCADE)")
-mycursor.execute("CREATE TABLE IF NOT EXISTS Faculty(FACULTY_ID INT AUTO_INCREMENT PRIMARY KEY, FULL_NAME VARCHAR(50) NOT NULL, COURSE_NAME VARCHAR(50) NOT NULL, EXPERIENCE INT NOT NULL, DESIGNATION VARCHAR(50) NOT NULL)")
-mycursor.execute("CREATE TABLE IF NOT EXISTS Faculty_Qualifications(FACULTY_ID INT NOT NULL, QUALIFICATION VARCHAR(50) NOT NULL, FOREIGN KEY (FACULTY_ID) REFERENCES Faculty(FACULTY_ID) ON DELETE CASCADE)")
-mycursor.execute("CREATE TABLE IF NOT EXISTS Staff(STAFF_ID INT AUTO_INCREMENT PRIMARY KEY, FULL_NAME VARCHAR(50) NOT NULL, ROLE VARCHAR(50) NOT NULL, DATE_OF_JOINING DATE NOT NULL)")
-mycursor.execute("ALTER TABLE Subjects ADD CONSTRAINT PK_Subjects PRIMARY KEY (SUBJECT_CODE, BRANCH_NAME, SEMESTER)")
-mydb.commit()
-mycursor.close()
-mydb.close()
+def connection() -> mysql.MySQLConnection:
+    return mysql.connect(
+        host="localhost",
+        user="root",
+        password="123456789",
+        database="college_management_system"
+    )
 
-print("Database and tables created successfully.")
+def create_student(student) -> None:
+    conn = connection()
+    cursor = conn.cursor()
+    query = "INSERT INTO STUDENTS(ENROLLMENT_ID, FULL_NAME, BRANCH_NAME, YEAR_OF_ADMISSION, SEMESTER) VALUES (%s, %s, %s, %s, %s)"
+    values = (student.roll_no, student.name, student.branch, student.year_of_admission, student.semester)
+    cursor.execute(query, values)
+    conn.commit()
+    cursor.close()
+    
+print("Database connected successfully.")
