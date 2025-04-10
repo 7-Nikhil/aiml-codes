@@ -1,8 +1,9 @@
 from abc import ABC, abstractmethod
 from datetime import date, datetime
 from enum import Enum 
+import student_management_system_db 
 
-def load_branch_subjects(filename="branch subjects.txt"):
+def load_branch_subjects(filename="branch subjects.txt") -> dict:
     branch_subjects = {}
     
     with open(filename, "r") as file:
@@ -27,8 +28,19 @@ def load_branch_subjects(filename="branch subjects.txt"):
                     code, name = parts
                     branch_subjects[current_branch][current_semester][code] = name.strip()
     return branch_subjects
+
 branch_subjects = load_branch_subjects("branch subjects.txt")
-    
+conn = student_management_system_db.connection()
+cursor = conn.cursor()
+query = "REPLACE INTO SUBJECTS (SUBJECT_CODE, SUBJECT_NAME, BRANCH_NAME, SEMESTER) VALUES (%s, %s, %s, %s)"
+for branch, semesters in branch_subjects.items():
+    for semester, subjects in semesters.items():
+        for code, name in subjects.items():
+            cursor.execute(query, (code, name, branch, semester))
+conn.commit()
+cursor.close()  
+conn.close()
+print("Database updated successfully.")
 class College(ABC):
     @abstractmethod
     def display_result(self):
@@ -226,8 +238,10 @@ Please select a role:
             if roles == "STUDENT":
                 name, roll_no, branch, year_of_admission, semester = get_valid_multiple_input("\nEnter your Name, Roll no, Branch, Year of Admission, Semester (comma separated): ", 5)
                 student = Student(name.strip(), int(roll_no.strip()), branch.strip(), int(year_of_admission.strip()), int(semester))
+                student_management_system_db.create_student(student)
+                print("Student added to database successfully.")
                 student.display_result()
-                student.salary()
+                student.salary()                                                                                                  
                 
             elif roles == "FACULTY":
                 name, course = get_valid_multiple_input("\nEnter your Name, Course interested in teaching (comma separated): ", 2)
